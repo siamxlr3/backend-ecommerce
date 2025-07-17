@@ -62,8 +62,13 @@ const getProductsByCategory = async (req, res) => {
 
 const getProductsQuery=async(req,res)=>{
     try{
-        const {category,color,minPrice,maxPrice,page=1,limit=10}=req.query;
+        const {category,color,minPrice,keyword,maxPrice,page=1,limit=10}=req.query;
         const filter={};
+
+        if(keyword){
+            filter.name={$regex:keyword, $options:"i"};
+        }
+
         if(category && category !== "all"){
             filter.category=category;
         }

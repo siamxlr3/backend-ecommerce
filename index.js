@@ -1,43 +1,49 @@
 const express = require('express');
-const app = express();
-const mongoose=require('mongoose');
-const cors=require('cors');
-const cookieParser=require('cookie-parser');
-
-
-const port = process.env.PORT || 3000;
+const mongoose = require('mongoose');
+const cors = require('cors');
+const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
-app.use(express.json());
-app.use(cookieParser())
+const app = express();
+const port = process.env.PORT || 3000;
+
 app.use(cors({
-    origin:[ 'http://localhost:5173','https://aurellia-e-commerce-indol.vercel.app'],
+    origin: [
+        'http://localhost:5173',
+        'https://aurellia-e-commerce-indol.vercel.app'
+    ],
     credentials: true,
 }));
+app.use(express.json());
+app.use(cookieParser());
 
+const Userroute = require('./src/users/user.route');
+const Productroute = require('./src/products/product.route');
+const Reviewroute = require('./src/reviews/review.route');
+const Orderroute = require('./src/orders/order.route');
+const Stateroute = require('./src/stats/state.route');
 
-const Userroute=require('./src/users/user.route')
-const Productroute=require('./src/products/product.route')
-const Reviewroute=require('./src/reviews/review.route')
-const Orderroute=require('./src/orders/order.route')
-const Stateroute=require('./src/stats/state.route')
+app.use('/api/auth', Userroute);
+app.use('/api/product', Productroute);
+app.use('/api/review', Reviewroute);
+app.use('/api/order', Orderroute);
+app.use('/api/state', Stateroute);
 
-app.use('/api/auth',Userroute)
-app.use('/api/product',Productroute)
-app.use('/api/review',Reviewroute)
-app.use('/api/order',Orderroute)
-app.use('/api/state',Stateroute)
+app.get('/', (req, res) => {
+    res.send('Welcome to the Shopping App!');
+});
 
-async function main(){
-    await mongoose.connect(process.env.UB_URL);
-
-    app.get('/', (req, res) => {
-        res.send('Welcome to the Shopping App!');
-    })
+async function main() {
+    try {
+        await mongoose.connect(process.env.UB_URL);
+        console.log("MongoDB connected");
+    } catch (err) {
+        console.error("MongoDB connection error:", err);
+    }
 }
-main().then(()=>console.log("mongoDB connected")).catch(err => console.log(err));
 
-
-app.listen(port, () => {
-    console.log(`Server started on port ${port}`);
-})
+main().then(() => {
+    app.listen(port, () => {
+        console.log(`Server started on port ${port}`);
+    });
+});

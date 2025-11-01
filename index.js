@@ -9,7 +9,7 @@ const port = process.env.PORT || 3000;
 
 app.use(cors({
     origin: [
-        'https://aurellia-e-commerce-indol.vercel.app'
+        '*'
     ],
     credentials: true,
 }));

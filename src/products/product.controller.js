@@ -1,11 +1,27 @@
 const Products=require("../products/product.model")
 const Reviews=require("../reviews/review.model")
+const cloudinary = require("../utilitis/cloudinary");
 
 
 const createNewProduct=async(req,res)=>{
     try{
+        const {name,category,description,price,oldPrice,color,author}=req.body;
+        let imageURL=""
+        if(req.file){
+            const result=await cloudinary.uploader.upload(req.file.path,{
+                folder:"ProductImage"
+            })
+            imageURL=result.secure_url;
+        }
         const newProduct=new Products({
-            ...req.body
+            name,
+            category,
+            description,
+            price,
+            oldPrice,
+            color,
+            image:imageURL,
+            author
         })
         const saveProduct=await newProduct.save();
 
@@ -60,24 +76,38 @@ const getProductsByCategory = async (req, res) => {
 };
 
 
-const getProductsQuery=async(req,res)=>{
-    try{
-        const {category,color,minPrice,keyword,maxPrice,page=1,limit=10}=req.query;
-        const filter={};
+const getProductsQuery = async (req, res) => {
+    try {
+        const {
+            category,
+            color,
+            minPrice,
+            maxPrice,
+            keyword,
+            page = 1,
+            limit = 10
+        } = req.query;
 
-        if(keyword){
-            filter.name={$regex:keyword, $options:"i"};
+        const filter = {};
+
+        // Keyword search
+        if (keyword) {
+            filter.name = { $regex: keyword, $options: "i" };
         }
 
-        if(category && category !== "all"){
-            filter.category=category;
+        // Category filter
+        if (category && category !== "all") {
+            filter.category = category;
         }
-        if(color && color!=="all"){
-            filter.color=color;
+
+        // Color filter
+        if (color && color !== "all") {
+            filter.color = color;
         }
+
+        // Price filter
         const min = parseFloat(minPrice);
         const max = parseFloat(maxPrice);
-
         if (!isNaN(min) && !isNaN(max)) {
             filter.price = { $gte: min, $lte: max };
         } else if (!isNaN(min)) {
@@ -86,20 +116,34 @@ const getProductsQuery=async(req,res)=>{
             filter.price = { $lte: max };
         }
 
-        const skip=(parseInt(page)-1)*parseInt(limit);
-        const totalProduct=await Products.countDocuments(filter);
-        const totalPages=Math.ceil(totalProduct/parseInt(limit))
-        const products=await Products.find(filter)
-        .skip(skip)
+        // Pagination
+        const skip = (parseInt(page) - 1) * parseInt(limit);
+        const totalProduct = await Products.countDocuments(filter);
+        const totalPages = Math.ceil(totalProduct / parseInt(limit));
+
+        // Fetch products
+        const products = await Products.find(filter)
+            .skip(skip)
             .limit(parseInt(limit))
-            .populate("author",'email username')
-        .sort({createAt:-1});
+            .populate("author", "email username")
+            .sort({ createdAt: -1 });
 
-        return res.status(200).json({message:"Product found successfully.",data:products,totalPages,totalPages});
-    }catch(err){
+        return res.status(200).json({
+            message: "Products fetched successfully.",
+            data: products,
+            page: parseInt(page),
+            totalPages,
+            totalProducts: totalProduct
+        });
 
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            message: "Failed to fetch products.",
+            error: err.message
+        });
     }
-}
+};
 
 const getSingleProduct=async (req,res)=>{
     const {id}=req.params;
@@ -124,13 +168,21 @@ const getSingleProduct=async (req,res)=>{
 
 const updateSingleProduct=async(req,res)=>{
     const {id}=req.params;
-    const { name, category, description, price, oldPrice, image, color, rating } = req.body;
+    const { name, category, description, price, oldPrice, color, rating } = req.body;
     try{
+        let imageURL=""
+        if(req.file){
+            const result=await cloudinary.uploader.upload(req.file.path,{
+                folder:"ProductImage"
+            })
+            imageURL=result.secure_url;
+        }
+
         const updateProduct=await Products.findByIdAndUpdate(id,{
             name:name,
             price:price,
             oldPrice:oldPrice,
-            image:image,
+            image:imageURL,
             color:color,
             rating:rating,
             category:category,

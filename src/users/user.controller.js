@@ -1,5 +1,6 @@
 const UserModel=require('./user.model');
 const generateToken=require('../middleware/authMiddleware')
+const cloudinary=require('../utilitis/cloudinary')
 
 
 const Userregister=async(req,res)=>{
@@ -122,11 +123,18 @@ const updateUserrole=async(req,res)=>{
 
 const updateProfile=async (req,res)=>{
     const {id}=req.params;
-    const {username,profileImage,bio,profession}=req.body;
+    const {username,bio,profession}=req.body;
     try{
+        let imageURL=""
+        if(req.file){
+            const result=await cloudinary.uploader.upload(req.file.path,{
+                folder:"UserImage"
+            })
+            imageURL=result.secure_url;
+        }
         const profileupdate=await UserModel.findByIdAndUpdate(id,{
             username:username,
-            profileImage:profileImage,
+            profileImage:imageURL,
             bio:bio,
             profession:profession,
         },{new:true})

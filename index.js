@@ -5,7 +5,8 @@ const cors=require('cors');
 const cookieParser=require('cookie-parser');
 
 
-const port = process.env.PORT || 3000;
+// const port = process.env.PORT || 3000;
+const port =8000;
 require('dotenv').config();
 
 app.use(express.json());
@@ -15,19 +16,18 @@ app.use(cors({
     credentials: true,
 }));
 
+
 const Userroute=require('./src/users/user.route')
 const Productroute=require('./src/products/product.route')
 const Reviewroute=require('./src/reviews/review.route')
 const Orderroute=require('./src/orders/order.route')
 const Stateroute=require('./src/stats/state.route')
-const uploadRoute=require("./src/uploadRoute/uploadRoute")
 
 app.use('/api/auth',Userroute)
 app.use('/api/product',Productroute)
 app.use('/api/review',Reviewroute)
 app.use('/api/order',Orderroute)
 app.use('/api/state',Stateroute)
-app.use("/api/upload",uploadRoute)
 
 async function main(){
     await mongoose.connect(process.env.UB_URL);

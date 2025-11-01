@@ -1,4 +1,4 @@
-const baseURL="https://aurellia-e-commerce.vercel.app"
+const baseURL="https://aurellia.vercel.app"
 
 
 module.exports={baseURL}

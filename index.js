@@ -5,14 +5,13 @@ const cors=require('cors');
 const cookieParser=require('cookie-parser');
 
 
-// const port = process.env.PORT || 3000;
-const port =8000;
+const port = process.env.PORT || 3000;
 require('dotenv').config();
 
 app.use(express.json());
 app.use(cookieParser())
 app.use(cors({
-    origin:[ 'http://localhost:5173','https://aurellia-e-commerce.vercel.app'],
+    origin:[ 'http://localhost:5173','https://aurellia-e-commerce-indol.vercel.app/'],
     credentials: true,
 }));
 

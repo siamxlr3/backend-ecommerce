@@ -8,7 +8,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.options('*', cors({
-    origin: ['https://aurellia-e-commerce-indol.vercel.app'],
+    origin: ['https://aurellia.vercel.app'],
     credentials: true,
 }));
 
